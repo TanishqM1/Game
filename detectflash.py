@@ -29,4 +29,4 @@ with mss.mss() as sct:
         if is_flashed(screenshot):
             print("Flashed!")
         # Add a small delay to control the loop frequency
-        time.sleep(.05)  # 10ms delay
+        time.sleep(.01)  # 10ms delay
