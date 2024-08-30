@@ -2,7 +2,7 @@ import mss
 import numpy as np
 import time
 
-def is_flashed(image, threshold=240, flash_percentage=0.7):
+def is_flashed(image, threshold=240, flash_percentage=0.8):
     # Convert the image to grayscale
     gray_image = np.mean(image, axis=2)
     
@@ -14,7 +14,6 @@ def is_flashed(image, threshold=240, flash_percentage=0.7):
     bright_percentage = bright_pixels / total_pixels
     
     # Determine if the screen is flashed
-    print (bright_percentage)
     return bright_percentage > flash_percentage
 
 with mss.mss() as sct:
