@@ -2,8 +2,8 @@ import cv2
 import numpy as np
 import mss
 
-lower = np.array([0, 150, 20])
-upper = np.array([10, 255, 255])
+lower = np.array([0, 150, 75])
+upper = np.array([5, 255, 255])
 
 screen_width = 1920
 screen_height = 1080
@@ -21,24 +21,30 @@ def detect_red_in_bgr(roi):
 
         mask = cv2.inRange(frame, lower, upper)
 
-        cv2.imshow("Red Detection (BGR)", mask)
-
-        return cv2.countNonZero(mask)
+        return mask, cv2.countNonZero(mask)
     
 while True:
 
-    top_red_pixels = detect_red_in_bgr(top_edge)
-    bottom_red_pixels = detect_red_in_bgr(bottom_edge)
-    left_red_pixels = detect_red_in_bgr(left_edge)
-    right_red_pixels = detect_red_in_bgr(right_edge)
+    top_mask, top_red_pixels = detect_red_in_bgr(top_edge)
+    bottom_mask, bottom_red_pixels = detect_red_in_bgr(bottom_edge)
+    left_mask, left_red_pixels = detect_red_in_bgr(left_edge)
+    right_mask, right_red_pixels = detect_red_in_bgr(right_edge)
 
-    if top_red_pixels > 500:
+    combined_mask = np.zeros((screen_height, screen_width), dtype=np.uint8)
+    combined_mask[0:edge_thickness, :] = top_mask
+    combined_mask[screen_height-edge_thickness:, :] = bottom_mask 
+    combined_mask[:, 0:edge_thickness] = left_mask
+    combined_mask[:, screen_width-edge_thickness:] = right_mask
+
+    cv2.imshow("Red Detection at Screen Edges", combined_mask)
+
+    if top_red_pixels > 700:
         print("Red patch detected at the top!")
-    if bottom_red_pixels > 500:
+    if bottom_red_pixels > 700:
         print("Red patch detected at the bottom!")
-    if left_red_pixels > 500:
+    if left_red_pixels > 700:
         print("Red patch detected on the left!")
-    if right_red_pixels > 500:
+    if right_red_pixels > 700:
         print("Red patch detected on the right!")
    
     if cv2.waitKey(25) & 0xFF == ord('q'):
