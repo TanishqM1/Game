@@ -6,8 +6,9 @@ from mss import mss
 # Define the screen region to capture (x, y, width, height)
 monitor = {"top": 1007, "left": 616, "width": 71, "height": 54}
 
-with mss() as sct:
-    while True:
+def detect():
+    with mss() as sct:
+
         # Capture the screen
         img = np.array(sct.grab(monitor))
 
@@ -19,12 +20,7 @@ with mss() as sct:
 
         try:
             hp = int(hp_text.strip())
-            print(f"HP: {hp}")
+            if (hp.is_integer()): 
+                return hp
         except ValueError:
-            print("Failed to detect HP")
-
-        # Break the loop with a key press (e.g., 'q')
-        if cv2.waitKey(1) & 0xFF == ord('q'):
-            break
-
-cv2.destroyAllWindows()
+            return 101
