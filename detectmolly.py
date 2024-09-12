@@ -22,8 +22,11 @@ def detectmolotov(segment):
     return np.max(correlation) > 1000000
 
 #chatgpt code to get incoming audio (NOT TESTED)
-def audiocallback(indata, frames, time,):
+def audiocallback(indata, frames, time, status):
     
+    if status:
+        print(status)
+        
     audioclip = AudioSegment(
         data=indata.tobytes(),
         sample_width=indata.dtype.itemsize,
