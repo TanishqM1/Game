@@ -8,13 +8,13 @@ from scipy.signal import correlate
 def audio_to_numpy(segment):
     return np.array(segment.get_array_of_samples())
 
-#molotov_sound should be audio of standing in a molotov
-#Loads and stores raw audio of molly in "RawMolotov"
-molotov_template = AudioSegment.from_file("molotov_sound.wav", format="wav")
-RawMolotov = audio_to_numpy(molotov_template)
+
+#Loads and stores raw audio of molly in "RawMolotov".
+#incase audio doesn't load, try: mollyaudio AudioSegment.from_file("molotov_sound.wav", format="wav")
+RawMolotov = audio_to_numpy(AudioSegment.from_file("molotov_sound.wav", format="wav"))
 
 #calculatues the correlation between the two samples, based on the given threshold
-def detectmolotov(segment, mollysample, threshold):
+def detectmolotov(segment, threshold):
     incomingsample = audio_to_numpy(segment)  
     correlation = correlate(incomingsample, RawMolotov, mode='valid')
 
@@ -28,7 +28,7 @@ def callback(indata, frames, time, status):
     audioclip = AudioSegment(
         data=indata.tobytes(),
         sample_width=indata.dtype.itemsize,
-        framerate = frames #usually 48000 ?
+        framerate = frames, #usually 48000 ?
         channels = 1
     )
 
