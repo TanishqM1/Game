@@ -19,13 +19,11 @@ def detectmolotov(segment):
     incomingsample = audio_to_numpy(segment)  
     correlation = correlate(incomingsample, MolotovSample, mode='valid')
 
-    if np.max(correlation)>1000000:
-        return True
-    return False
+    return np.max(correlation) > 1000000
 
 #chatgpt code to get incoming audio (NOT TESTED)
-def audiocallback(indata, frames, time, status):
-
+def audiocallback(indata, frames, time,):
+    
     audioclip = AudioSegment(
         data=indata.tobytes(),
         sample_width=indata.dtype.itemsize,
@@ -35,8 +33,7 @@ def audiocallback(indata, frames, time, status):
     
     if detectmolotov(audioclip):
         print("Molotov Sound Detected!")
-    else: 
-        print("Nothing Detected")
+ 
     
 
 #realtime audio callback. Gets audio and calls the "audiocallback" function, which consistently runs "detectmolotov"
@@ -46,10 +43,7 @@ with sd.InputStream(callback=audiocallback, channels=1, samplerate=48000):
     sd.sleep(float('inf'))
     
 
-    
 
-
-#NEEDED: 1) test file upload to this script, 2) need to test incoming audio, 3) need to test compare method.
 
 
 
