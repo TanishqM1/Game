@@ -23,4 +23,4 @@ def detect():
             if (hp.is_integer()): 
                 return hp
         except ValueError:
-            return 101
+            return 101      
