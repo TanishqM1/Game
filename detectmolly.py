@@ -36,7 +36,16 @@ def audiocallback(indata, frames, time, status):
     
     if detectmolotov(audioclip):
         print("Molotov Sound Detected!")
- 
+
+ #Double checks that health is being dropped after molotov sound is made
+    health = detect()  # Call your health detection function
+    if health < previous_health:  # Compare with previously stored health
+        print("Player is likely being damaged by a Molotov.")
+    else:
+        print("No health drop detected yet.")
+
+# Initialize previous health for comparison
+previous_health = detect()  
     
 
 #realtime audio callback. Gets audio and calls the "audiocallback" function, which consistently runs "detectmolotov"
