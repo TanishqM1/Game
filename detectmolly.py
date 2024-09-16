@@ -34,13 +34,4 @@ tf.math.reduce_mean(lengths)
 tf.math.reduce_min(lengths)
 tf.math.reduce_max(lengths)
 
-def preprocess(file_path, label): 
-    wav = load_wav_16k_mono(file_path)
-    wav = wav[:48000]
-    zero_padding = tf.zeros([48000] - tf.shape(wav), dtype=tf.float32)
-    wav = tf.concat([zero_padding, wav],0)
-    spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
-    spectrogram = tf.abs(spectrogram)
-    spectrogram = tf.expand_dims(spectrogram, axis=2)
-    return spectrogram, label
-
+print(tf.math.reduce_mean(lengths))
