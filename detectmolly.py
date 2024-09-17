@@ -77,3 +77,6 @@ test = data.skip(23).take(10)
 samples, labels = train.as_numpy_iterator().next()
 print(samples.shape)
 
+plt.figure(figsize=(30,20))
+plt.imshow(tf.transpose(spectrogram)[0])
+plt.show()
