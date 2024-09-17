@@ -34,4 +34,5 @@ tf.math.reduce_mean(lengths)
 tf.math.reduce_min(lengths)
 tf.math.reduce_max(lengths)
 
+print("check")
 print(tf.math.reduce_mean(lengths))
