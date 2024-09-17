@@ -15,16 +15,21 @@ def load_wav_16k_mono(filename):
     wav = tfio.audio.resample(wav, rate_in=sample_rate, rate_out=16000)
     return wav
 
+#pathways to positive and negative clips
 POS = os.path.join('data', 'Molotov_Clips')
 NEG = os.path.join('data', 'Not_Molotov_Clips')
 
+
+#filtering .wav files in each folder
 pos2 = tf.data.Dataset.list_files(POS+'\*.wav')
 neg2 = tf.data.Dataset.list_files(NEG+'\*.wav')
 
+#idk
 positives = tf.data.Dataset.zip((pos2, tf.data.Dataset.from_tensor_slices(tf.ones(len(pos2)))))
 negatives = tf.data.Dataset.zip((neg2, tf.data.Dataset.from_tensor_slices(tf.zeros(len(neg2)))))
 data = positives.concatenate(negatives)
 
+#finding lengths of all data files
 lengths = []
 for file in os.listdir(os.path.join('data', 'Molotov_Clips')):
     tensor_wave = load_wav_16k_mono(os.path.join('data', 'Molotov_Clips', file))
@@ -39,7 +44,7 @@ print(tf.math.reduce_mean(lengths))
 print(tf.math.reduce_min(lengths))
 print(tf.math.reduce_max(lengths))
 
-
+#preprocessinng files to convert to spectogram
 def preprocess(file_path, label): 
     wav = load_wav_16k_mono(file_path)
     wav = wav[:6500]
@@ -54,3 +59,19 @@ def preprocess(file_path, label):
 
 filepath, label = positives.shuffle(buffer_size=10000).as_numpy_iterator().next()
 spectrogram, label = preprocess(filepath, label)
+
+#preprocessing data strings
+data = data.map(preprocess)
+data = data.cache()
+data = data.shuffle(buffer_size=1000)
+data = data.batch(16)
+data = data.prefetch(8)
+
+#train machine using 70% of clips and test on the renaming 30%.
+
+train = data.take(23)
+test = data.skip(23).take(10)
+
+#show spectogram shape needed, for a positive match.
+samples, labels = train.as_numpy_iterator().next()
+print(samples.shape)
