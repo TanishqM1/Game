@@ -54,4 +54,3 @@ def preprocess(file_path, label):
 
 filepath, label = positives.shuffle(buffer_size=10000).as_numpy_iterator().next()
 spectrogram, label = preprocess(filepath, label)
-print(spectrogram)
