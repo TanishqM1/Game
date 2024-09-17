@@ -36,3 +36,22 @@ tf.math.reduce_max(lengths)
 
 print("check")
 print(tf.math.reduce_mean(lengths))
+print(tf.math.reduce_min(lengths))
+print(tf.math.reduce_max(lengths))
+
+
+def preprocess(file_path, label): 
+    wav = load_wav_16k_mono(file_path)
+    wav = wav[:6500]
+    zero_padding = tf.zeros([6500] - tf.shape(wav), dtype=tf.float32)
+    wav = tf.concat([zero_padding, wav],0)
+    spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
+    spectrogram = tf.abs(spectrogram)
+    spectrogram = tf.expand_dims(spectrogram, axis=2)
+    return spectrogram, label
+
+#tweak frame_length, frame_step & wav[6500] based on testing
+
+filepath, label = positives.shuffle(buffer_size=10000).as_numpy_iterator().next()
+spectrogram, label = preprocess(filepath, label)
+print(spectrogram)
