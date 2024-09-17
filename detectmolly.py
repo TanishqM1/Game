@@ -3,6 +3,7 @@ from matplotlib import pyplot as plt
 import tensorflow as tf 
 import tensorflow_io as tfio
 
+
 def load_wav_16k_mono(filename):
     # Load encoded wav file
     file_contents = tf.io.read_file(filename)
@@ -75,3 +76,4 @@ test = data.skip(23).take(10)
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
 print(samples.shape)
+
