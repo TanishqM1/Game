@@ -75,8 +75,25 @@ test = data.skip(23).take(10)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
-print(samples.shape)
 
-plt.figure(figsize=(30,20))
-plt.imshow(tf.transpose(spectrogram)[0])
-plt.show()
+
+from tensorflow.keras.models import Sequential
+from tensorflow.keras.layers import Conv2D, Dense, Flatten
+
+#build deep learning model
+
+model = Sequential()
+model.add(Conv2D(16, (3,3), activation='relu', input_shape=(194, 257,1)))
+model.add(Conv2D(16, (3,3), activation='relu'))
+model.add(Flatten())
+model.add(Dense(128, activation='relu'))
+model.add(Dense(1, activation='sigmoid'))
+
+model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recall(),tf.keras.metrics.Precision()])
+
+# print(model.summary())
+
+#train model
+
+# epochs can be tweaked. Larger = more accurate
+hist = model.fit(train, epochs=4, validation_data=test)
