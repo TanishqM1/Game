@@ -96,4 +96,15 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=4, validation_data=test)
+hist = model.fit(train, epochs=10, validation_data=test)
+
+X_test, y_test = test.as_numpy_iterator().next()
+yhat = model.predict(X_test)
+
+yhat = [1 if prediction > 0.5 else 0 for prediction in yhat]
+
+print(tf.math.reduce_sum(yhat))
+print(tf.math.reduce_sum(y_test))
+
+print(yhat)
+print(y_test)
