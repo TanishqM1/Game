@@ -68,6 +68,7 @@ data = data.shuffle(buffer_size=1000)
 data = data.batch(16)
 data = data.prefetch(8)
 
+# print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
 train = data.take(23)
@@ -108,3 +109,54 @@ print(tf.math.reduce_sum(y_test))
 
 print(yhat)
 print(y_test)
+
+import sounddevice as sd
+import numpy as np
+
+SAMPLE_RATE = 16000  # 16 kHz
+CHUNK_DURATION = 1  # Process audio in 1-second chunks
+CHUNK_SIZE = SAMPLE_RATE * CHUNK_DURATION  # Number of samples in a chunk
+
+# Function to capture a chunk of system audio
+def record_system_audio_chunk(sample_rate, chunk_size):
+    print("Capturing audio chunk...")
+    audio_chunk = sd.rec(chunk_size, samplerate=sample_rate, channels=1, dtype='float32',
+                         device=None,  # Use default system output (WASAPI)
+                         blocking=True)
+    audio_chunk = tf.convert_to_tensor(audio_chunk[:, 0], dtype=tf.float32)  # Remove channel dimension
+    return audio_chunk
+
+# Preprocess audio chunk into spectrogram
+def preprocess_audio_chunk(audio_chunk):
+    audio_chunk = tfio.audio.resample(audio_chunk, rate_in=SAMPLE_RATE, rate_out=16000)
+    audio_chunk = audio_chunk[:6500]
+    zero_padding = tf.zeros([6500] - tf.shape(audio_chunk), dtype=tf.float32)
+    audio_chunk = tf.concat([zero_padding, audio_chunk], 0)
+    spectrogram = tf.signal.stft(audio_chunk, frame_length=320, frame_step=32)
+    spectrogram = tf.abs(spectrogram)
+    spectrogram = tf.expand_dims(spectrogram, axis=2)
+    return spectrogram
+
+# Real-time audio detection loop
+def detect_real_time_audio():
+    while True:
+        audio_chunk = record_system_audio_chunk(SAMPLE_RATE, CHUNK_SIZE)
+        spectrogram = preprocess_audio_chunk(audio_chunk)
+
+        # Make prediction
+        prediction = model.predict(tf.expand_dims(spectrogram, axis=0))
+        prediction_label = 1 if prediction > 0.5 else 0
+
+        if prediction_label == 1:
+            print("Match detected!")
+        else:
+            print("No match detected.")
+        
+        # Add a break condition if you want to stop
+        # For example, press a key or run for a certain number of seconds
+        # To stop the loop, you could add:
+        # if stop_condition: 
+        #    break
+
+# Start real-time audio detection
+detect_real_time_audio()
