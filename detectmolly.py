@@ -48,8 +48,8 @@ print(tf.math.reduce_max(lengths))
 #preprocessinng files to convert to spectogram
 def preprocess(file_path, label): 
     wav = load_wav_16k_mono(file_path)
-    wav = wav[:6500]
-    zero_padding = tf.zeros([6500] - tf.shape(wav), dtype=tf.float32)
+    wav = wav[:48000]
+    zero_padding = tf.zeros([48000] - tf.shape(wav), dtype=tf.float32)
     wav = tf.concat([zero_padding, wav],0)
     spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
     spectrogram = tf.abs(spectrogram)
@@ -60,6 +60,7 @@ def preprocess(file_path, label):
 
 filepath, label = positives.shuffle(buffer_size=10000).as_numpy_iterator().next()
 spectrogram, label = preprocess(filepath, label)
+print(spectrogram.shape)
 
 #preprocessing data strings
 data = data.map(preprocess)
@@ -68,11 +69,11 @@ data = data.shuffle(buffer_size=1000)
 data = data.batch(16)
 data = data.prefetch(8)
 
-# print(len(data))
+print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
-train = data.take(23)
-test = data.skip(23).take(10)
+train = data.take(22)
+test = data.skip(22).take(10)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
@@ -84,7 +85,7 @@ from tensorflow.keras.layers import Conv2D, Dense, Flatten
 #build deep learning model
 
 model = Sequential()
-model.add(Conv2D(16, (3,3), activation='relu', input_shape=(194, 257,1)))
+model.add(Conv2D(16, (3,3), activation='relu', input_shape=(1491, 257, 1)))
 model.add(Conv2D(16, (3,3), activation='relu'))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
@@ -97,7 +98,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=10, validation_data=test)
+hist = model.fit(train, epochs=5, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -110,53 +111,57 @@ print(tf.math.reduce_sum(y_test))
 print(yhat)
 print(y_test)
 
-import sounddevice as sd
-import numpy as np
+def load_mp3_16k_mono(filename):
+    """ Load a WAV file, convert it to a float tensor, resample to 16 kHz single-channel audio. """
+    res = tfio.audio.AudioIOTensor(filename)
+    # Convert to tensor and combine channels 
+    tensor = res.to_tensor()
+    tensor = tf.math.reduce_sum(tensor, axis=1) / 2 
+    # Extract sample rate and cast
+    sample_rate = res.rate
+    sample_rate = tf.cast(sample_rate, dtype=tf.int64)
+    # Resample to 16 kHz
+    wav = tfio.audio.resample(tensor, rate_in=sample_rate, rate_out=16000)
+    return wav
 
-SAMPLE_RATE = 16000  # 16 kHz
-CHUNK_DURATION = 1  # Process audio in 1-second chunks
-CHUNK_SIZE = SAMPLE_RATE * CHUNK_DURATION  # Number of samples in a chunk
-
-# Function to capture a chunk of system audio
-def record_system_audio_chunk(sample_rate, chunk_size):
-    print("Capturing audio chunk...")
-    audio_chunk = sd.rec(chunk_size, samplerate=sample_rate, channels=1, dtype='float32',
-                         device=None,  # Use default system output (WASAPI)
-                         blocking=True)
-    audio_chunk = tf.convert_to_tensor(audio_chunk[:, 0], dtype=tf.float32)  # Remove channel dimension
-    return audio_chunk
-
-# Preprocess audio chunk into spectrogram
-def preprocess_audio_chunk(audio_chunk):
-    audio_chunk = tfio.audio.resample(audio_chunk, rate_in=SAMPLE_RATE, rate_out=16000)
-    audio_chunk = audio_chunk[:6500]
-    zero_padding = tf.zeros([6500] - tf.shape(audio_chunk), dtype=tf.float32)
-    audio_chunk = tf.concat([zero_padding, audio_chunk], 0)
-    spectrogram = tf.signal.stft(audio_chunk, frame_length=320, frame_step=32)
+def preprocess_mp3(sample, index):
+    sample = sample[0]
+    zero_padding = tf.zeros([48000] - tf.shape(sample), dtype=tf.float32)
+    wav = tf.concat([zero_padding, sample],0)
+    spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
     spectrogram = tf.abs(spectrogram)
     spectrogram = tf.expand_dims(spectrogram, axis=2)
     return spectrogram
 
-# Real-time audio detection loop
-def detect_real_time_audio():
-    while True:
-        audio_chunk = record_system_audio_chunk(SAMPLE_RATE, CHUNK_SIZE)
-        spectrogram = preprocess_audio_chunk(audio_chunk)
+from itertools import groupby
 
-        # Make prediction
-        prediction = model.predict(tf.expand_dims(spectrogram, axis=0))
-        prediction_label = 1 if prediction > 0.5 else 0
+results = {}
+for file in os.listdir(os.path.join('data', 'test_clips')):
+    FILEPATH = os.path.join('data','test_clips', file)
+    
+    wav = load_mp3_16k_mono(FILEPATH)
+    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=48000, batch_size=1)
+    audio_slices = audio_slices.map(preprocess_mp3)
+    audio_slices = audio_slices.batch(64)
+    print(audio_slices)
+    
+    yhat = model.predict(audio_slices)
+    
+    results[file] = yhat
 
-        if prediction_label == 1:
-            print("Match detected!")
-        else:
-            print("No match detected.")
-        
-        # Add a break condition if you want to stop
-        # For example, press a key or run for a certain number of seconds
-        # To stop the loop, you could add:
-        # if stop_condition: 
-        #    break
+class_preds = {}
+for file, logits in results.items():
+    class_preds[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
 
-# Start real-time audio detection
-detect_real_time_audio()
+
+postprocessed = {}
+for file, scores in class_preds.items():
+    postprocessed[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
+
+import csv
+
+with open('results.csv', 'w', newline='') as f:
+    writer = csv.writer(f, delimiter=',')
+    writer.writerow(['recording', 'molly_calls'])
+    for key, value in postprocessed.items():
+        writer.writerow([key, value])
