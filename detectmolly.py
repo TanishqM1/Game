@@ -72,8 +72,8 @@ data = data.prefetch(8)
 print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
-train = data.take(22)
-test = data.skip(22).take(10)
+train = data.take(24)
+test = data.skip(24).take(10)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
