@@ -72,8 +72,8 @@ data = data.prefetch(8)
 print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
-train = data.take(24)
-test = data.skip(24).take(10)
+train = data.take(8)
+test = data.skip(8).take(3)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
@@ -98,7 +98,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=5, validation_data=test)
+hist = model.fit(train, epochs=4, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -140,7 +140,7 @@ for file in os.listdir(os.path.join('data', 'test_clips')):
     FILEPATH = os.path.join('data','test_clips', file)
     
     wav = load_mp3_16k_mono(FILEPATH)
-    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=48000, batch_size=1)
+    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
     audio_slices = audio_slices.map(preprocess_mp3)
     audio_slices = audio_slices.batch(64)
     print(audio_slices)
