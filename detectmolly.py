@@ -2,6 +2,8 @@ import os
 from matplotlib import pyplot as plt
 import tensorflow as tf 
 import tensorflow_io as tfio
+import soundcard as sc
+import soundfile as sf
 
 
 def load_wav_16k_mono(filename):
@@ -135,33 +137,74 @@ def preprocess_mp3(sample, index):
 
 from itertools import groupby
 
-results = {}
-for file in os.listdir(os.path.join('data', 'test_clips')):
-    FILEPATH = os.path.join('data','test_clips', file)
+def preprocess_numpy_audio(numpy_array, sample_rate, target_sample_rate=16000):
+    # Step 1: Convert NumPy array to a TensorFlow tensor
+    tensor = tf.convert_to_tensor(numpy_array, dtype=tf.float32)
     
-    wav = load_mp3_16k_mono(FILEPATH)
-    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
-    audio_slices = audio_slices.map(preprocess_mp3)
-    audio_slices = audio_slices.batch(64)
-    print(audio_slices)
+    # Step 2: Combine stereo channels (assuming the NumPy array has shape [num_samples, num_channels])
+    if len(tensor.shape) > 1 and tensor.shape[1] == 2:
+        tensor = tf.math.reduce_sum(tensor, axis=1) / 2  # Combine stereo to mono
     
-    yhat = model.predict(audio_slices)
+    # Step 3: Cast sample rate (if it's not already an integer)
+    sample_rate = tf.cast(sample_rate, dtype=tf.int64)
     
-    results[file] = yhat
+    # Step 4: Resample to 16 kHz (or the target sample rate)
+    resampled_tensor = tfio.audio.resample(tensor, rate_in=sample_rate, rate_out=target_sample_rate)
+    
+    return resampled_tensor
 
-class_preds = {}
-for file, logits in results.items():
-    class_preds[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
+
+while (True):
+    with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
+   #saves a numpy array of audio in "data".
+        incomingdata = mic.record(numframes=48000*3)
+        
+        processed_audio = preprocess_numpy_audio(incomingdata, 48000)
+        audio_slices = tf.keras.utils.timeseries_dataset_from_array(processed_audio, processed_audio, sequence_length=48000, sequence_stride=47999, batch_size=1)
+        audio_slices = audio_slices.map(preprocess_mp3)
+        audio_slices = audio_slices.batch(64)
+        
+        yhat = model.predict(audio_slices)
+        
+        for logits in yhat:
+            if max(logits)>0.99:
+                print("Detected Molly")
+            else:
+                print ("No MOlly Detected")
+
+                ##OR
+
+            #     for file, logits in check.items():
+            # if (prediction > 0.99 for prediction in logits):
+            #     print("Molly Detected")
+            # else:
+            #     print("No Molly Detected")
 
 
-postprocessed = {}
-for file, scores in class_preds.items():
-    postprocessed[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
+# results = {}
+# for file in os.listdir(os.path.join('data', 'test_clips')):
+#     FILEPATH = os.path.join('data','test_clips', file)
+    
+#     wav = load_mp3_16k_mono(FILEPATH)
+#     print(audio_slices)
+    
+#     yhat = model.predict(audio_slices)
+    
+#     results[file] = yhat
 
-import csv
+# class_preds = {}
+# for file, logits in results.items():
+#     class_preds[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
 
-with open('results.csv', 'w', newline='') as f:
-    writer = csv.writer(f, delimiter=',')
-    writer.writerow(['recording', 'molly_calls'])
-    for key, value in postprocessed.items():
-        writer.writerow([key, value])
+
+# postprocessed = {}
+# for file, scores in class_preds.items():
+#     postprocessed[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
+
+# import csv
+
+# with open('results.csv', 'w', newline='') as f:
+#     writer = csv.writer(f, delimiter=',')
+#     writer.writerow(['recording', 'molly_calls'])
+#     for key, value in postprocessed.items():
+#         writer.writerow([key, value])
