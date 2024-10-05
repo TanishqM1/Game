@@ -185,8 +185,9 @@ for i in range(10):
         sf.write(file=file_path, data=data[:, 0], samplerate=48000)
 
      
-for file in os.listdir(incomingaudio):
-    FILEPATH = os.path.join('incomingaudio', file)
+for file in os.listdir(folder_path):
+
+    FILEPATH = os.path.join(folder_path, file)
 
     wav = load_mp3_16k_mono(FILEPATH)
     audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
@@ -194,6 +195,7 @@ for file in os.listdir(incomingaudio):
     audio_slices = audio_slices.batch(64)
     
     yhat = model.predict(audio_slices)
+    print(yhat)
 
     results2[file] = yhat
 
