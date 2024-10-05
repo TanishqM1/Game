@@ -173,26 +173,43 @@ with open('results.csv', 'w', newline='') as f:
 folder_path = "incomingaudio"
 os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
 
-# Define the complete file path
-file_path = os.path.join(folder_path, "TestRecording.wav")
+results2={}
+# Record audio and save to separate files
+for i in range(10):
+    # Define the complete file path for each recording
+    file_path = os.path.join(folder_path, f"TestRecording_{i + 1}.wav")
 
-for i in range (10):
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
         # Save a numpy array of audio in "data".
         data = mic.record(numframes=48000*3)
         sf.write(file=file_path, data=data[:, 0], samplerate=48000)
-        incomingaudio, samplerate = sf.read(file_path)
-        wav = load_mp3_16k_mono(incomingaudio)
-        audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
-        audio_slices = audio_slices.map(preprocess_mp3)
-        audio_slices = audio_slices.batch(64)
-        yhat = model.predict(audio_slices)
-        print("prediction")
-        print(yhat)
 
-        os.remove(file_path)
-        print(f"Deleted file: {file_path}")
-        
+     
+for file in os.listdir(incomingaudio):
+    FILEPATH = os.path.join('incomingaudio', file)
+
+    wav = load_mp3_16k_mono(FILEPATH)
+    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
+    audio_slices = audio_slices.map(preprocess_mp3)
+    audio_slices = audio_slices.batch(64)
+    
+    yhat = model.predict(audio_slices)
+
+    results2[file] = yhat
+
+    class_preds2 = {}
+for file, logits in results.items():
+    class_preds2[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
+
+
+postprocessed2 = {}
+for file, scores in class_preds2.items():
+    postprocessed2[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
+
+for key, value in postprocessed2.items():
+    print(key, value)
+
+
 
 
 
