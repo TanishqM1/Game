@@ -3,7 +3,6 @@ from matplotlib import pyplot as plt
 import tensorflow as tf 
 import tensorflow_io as tfio
 
-
 def load_wav_16k_mono(filename):
     # Load encoded wav file
     file_contents = tf.io.read_file(filename)
@@ -110,6 +109,12 @@ print(tf.math.reduce_sum(y_test))
 
 print(yhat)
 print(y_test)
+
+
+# begin record audio
+# 8===============D
+# end record audio
+
 
 def load_mp3_16k_mono(filename):
     """ Load a WAV file, convert it to a float tensor, resample to 16 kHz single-channel audio. """
