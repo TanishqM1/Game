@@ -198,7 +198,7 @@ for file in os.listdir(incomingaudio):
     results2[file] = yhat
 
     class_preds2 = {}
-for file, logits in results.items():
+for file, logits in results2.items():
     class_preds2[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
 
 
