@@ -2,6 +2,8 @@ import os
 from matplotlib import pyplot as plt
 import tensorflow as tf 
 import tensorflow_io as tfio
+import soundcard as sc
+import soundfile as sf
 
 def load_wav_16k_mono(filename):
     # Load encoded wav file
@@ -111,10 +113,6 @@ print(yhat)
 print(y_test)
 
 
-# begin record audio
-# 8===============D
-# end record audio
-
 
 def load_mp3_16k_mono(filename):
     """ Load a WAV file, convert it to a float tensor, resample to 16 kHz single-channel audio. """
@@ -170,4 +168,34 @@ with open('results.csv', 'w', newline='') as f:
     writer.writerow(['recording', 'molly_calls'])
     for key, value in postprocessed.items():
         writer.writerow([key, value])
-        #test
+        
+
+folder_path = "incomingaudio"
+os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
+
+# Define the complete file path
+file_path = os.path.join(folder_path, "TestRecording.wav")
+
+for i in range (10):
+    with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
+        # Save a numpy array of audio in "data".
+        data = mic.record(numframes=48000*3)
+        sf.write(file=file_path, data=data[:, 0], samplerate=48000)
+        incomingaudio, samplerate = sf.read(file_path)
+        wav = load_mp3_16k_mono(incomingaudio)
+        audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
+        audio_slices = audio_slices.map(preprocess_mp3)
+        audio_slices = audio_slices.batch(64)
+        yhat = model.predict(audio_slices)
+        print("prediction")
+        print(yhat)
+
+        os.remove(file_path)
+        print(f"Deleted file: {file_path}")
+        
+
+
+
+
+
+
