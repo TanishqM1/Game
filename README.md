@@ -4,5 +4,5 @@
 - Still a work in progress
 
 ## Credits
-- [Nicholas Renotte](https://www.youtube.com/watch?v=ZLIPkmmDJAc)
+- Thank you to [Nicholas Renotte](https://www.youtube.com/watch?v=ZLIPkmmDJAc)
 
