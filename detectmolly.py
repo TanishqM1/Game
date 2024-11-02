@@ -174,7 +174,7 @@ folder_path = "incomingaudio"
 os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
 
 results2={}
-# Record audio and save to separate files
+# Record 10 audio files (secs long) and save to "//incomingaudio"
 for i in range(10):
     # Define the complete file path for each recording
     file_path = os.path.join(folder_path, f"TestRecording_{i + 1}.wav")
@@ -184,7 +184,7 @@ for i in range(10):
         data = mic.record(numframes=48000*3)
         sf.write(file=file_path, data=data[:, 0], samplerate=48000)
 
-     
+#pre-process our recorded "incomingaudio". Then, store the results of our model prediction in # "results2". (range from 0-1)
 for file in os.listdir(folder_path):
 
     FILEPATH = os.path.join(folder_path, file)
@@ -202,8 +202,9 @@ for file in os.listdir(folder_path):
     class_preds2 = {}
 for file, logits in results2.items():
     class_preds2[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
+#class_preds2 has our classification reults (0 or 1) for our incoming audio.
 
-
+#converts tensorflow array to NumPy array, and prints out results in the format (FILE : RESULT)
 postprocessed2 = {}
 for file, scores in class_preds2.items():
     postprocessed2[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
