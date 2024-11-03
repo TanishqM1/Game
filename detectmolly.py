@@ -74,7 +74,7 @@ print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
 train = data.take(8)
-test = data.skip(8).take(3)
+test = data.skip(8).take(4)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
@@ -99,7 +99,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=4, validation_data=test)
+hist = model.fit(train, epochs=8, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -174,7 +174,7 @@ folder_path = "incomingaudio"
 os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
 
 results2={}
-# Record 10 audio files (secs long) and save to "//incomingaudio"
+# Record audio and save to separate files
 for i in range(10):
     # Define the complete file path for each recording
     file_path = os.path.join(folder_path, f"TestRecording_{i + 1}.wav")
