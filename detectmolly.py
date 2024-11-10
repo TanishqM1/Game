@@ -73,8 +73,8 @@ data = data.prefetch(8)
 print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
-train = data.take(54)
-test = data.skip(54).take(23)
+train = data.take(64)
+test = data.skip(64).take(28)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
@@ -99,7 +99,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=4, validation_data=test)
+hist = model.fit(train, epochs=1, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -170,59 +170,68 @@ import csv
 #         writer.writerow([key, value])
         
 
-folder_path = "incomingaudio"
-os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
+# folder_path = "incomingaudio"
+# os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
 
-results2={}
-# Record audio and save to separate files
-for i in range(10):
-    # Define the complete file path for each recording
-    file_path = os.path.join(folder_path, f"TestRecording_{i + 1}.wav")
+# results2={}
+# # Record audio and save to separate files
+# for i in range(10):
+#     # Define the complete file path for each recording
+#     file_path = os.path.join(folder_path, f"TestRecording_{i + 1}.wav")
 
+#     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
+#         # Save a numpy array of audio in "data".
+#         data = mic.record(numframes=48000)
+#         sf.write(file=file_path, data=data[:, 0], samplerate=48000)
+
+# #pre-process our recorded "incomingaudio". Then, store the results of our model prediction in # "results2". (range from 0-1)
+# for file in os.listdir(folder_path):
+
+#     FILEPATH = os.path.join(folder_path, file)
+
+#     wav = load_mp3_16k_mono(FILEPATH)
+#     audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=16000, sequence_stride=15999, batch_size=1)
+#     audio_slices = audio_slices.map(preprocess_mp3)
+#     audio_slices = audio_slices.batch(64)
+    
+#     yhat = model.predict(audio_slices)
+#     print(yhat)
+
+#     results2[file] = yhat
+
+#     class_preds2 = {}
+
+# # for item in results2.items():
+# #     print(item)
+# # print(results2)
+# for file, logits in results2.items():
+#     print(prediction for prediction in logits)
+
+# for file, logits in results2.items():
+#     class_preds2[file] = [1 if prediction > 0.5 else 0 for prediction in logits]
+# #class_preds2 has our classification reults (0 or 1) for our incoming audio.
+
+# #converts tensorflow array to NumPy array, and prints out results in the format (FILE : RESULT)
+# postprocessed2 = {}
+# for file, scores in class_preds2.items():
+#     postprocessed2[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
+
+# for key, value in postprocessed2.items(): 
+#     print(key, value)
+
+
+
+
+
+
+
+while(True):
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
         # Save a numpy array of audio in "data".
         data = mic.record(numframes=48000)
-        sf.write(file=file_path, data=data[:, 0], samplerate=48000)
-
-#pre-process our recorded "incomingaudio". Then, store the results of our model prediction in # "results2". (range from 0-1)
-for file in os.listdir(folder_path):
-
-    FILEPATH = os.path.join(folder_path, file)
-
-    wav = load_mp3_16k_mono(FILEPATH)
-    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=16000, sequence_stride=15999, batch_size=1)
-    audio_slices = audio_slices.map(preprocess_mp3)
-    audio_slices = audio_slices.batch(64)
     
-    yhat = model.predict(audio_slices)
+    yhat = model.predict()
     print(yhat)
 
-    results2[file] = yhat
 
-    class_preds2 = {}
-
-# for item in results2.items():
-#     print(item)
-# print(results2)
-for file, logits in results2.items():
-    print(prediction for prediction in logits)
-
-for file, logits in results2.items():
-    class_preds2[file] = [1 if prediction > 0.5 else 0 for prediction in logits]
-#class_preds2 has our classification reults (0 or 1) for our incoming audio.
-
-#converts tensorflow array to NumPy array, and prints out results in the format (FILE : RESULT)
-postprocessed2 = {}
-for file, scores in class_preds2.items():
-    postprocessed2[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
-
-for key, value in postprocessed2.items(): 
-    print(key, value)
-
-
-
-
-
-
-
-
+    
