@@ -220,18 +220,41 @@ import csv
 #     print(key, value)
 
 
+# while(True):
+#     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
+#         # Save a numpy array of audio in "data".
+#         data = mic.record(numframes=48000)
+    
+#     yhat = model.predict()
+#     print(yhat)
 
 
+#//////////////////////////////////////
+#create folder path
+folder_path = "incomingaudio"
+os.makedirs(folder_path, exist_ok=True)
 
+i=0
 
-
-while(True):
+while True:
+    
+    i+=1
+    
+    file_path = os.path.join(folder_path, f"TestRecording_{i}.wav")
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
-        # Save a numpy array of audio in "data".
-        data = mic.record(numframes=48000)
+        data = mic.record(numframes=48000)  # Record 1 second of audio
+        sf.write(file=file_path, data=data[:, 0], samplerate=48000)  # Save as .wav file
+        
+    wav = load_wav_16k_mono(file_path)
+    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=16000, sequence_stride=15999, batch_size=1)
+    audio_slices = audio_slices.map(preprocess_mp3)
+    audio_slices = audio_slices.batch(64)
     
-    yhat = model.predict()
-    print(yhat)
-
-
+    yhat = model.predict(audio_slices)
     
+    for prediction in yhat:
+        if prediction > 0.5:
+            print("Molly detected")
+        else:
+            print("Nothing")
+        
