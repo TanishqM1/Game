@@ -236,33 +236,38 @@ os.makedirs(folder_path, exist_ok=True)
 
 i=0
 
+i = 0
+folder_path = "your_folder_path_here"  # You can leave this out if you're not saving files.
+
 while True:
+    i += 1
     
-    i+=1
-    
-    file_path = os.path.join(folder_path, f"TestRecording_{i}.wav")
+    # Record 1 second of audio from the microphone
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
         data = mic.record(numframes=48000)  # Record 1 second of audio
-        sf.write(file=file_path, data=data[:, 0], samplerate=48000)  # Save as .wav file
-        
-    wav = load_wav_16k_mono(data[:, 0], sample_rate=48000)
-    zero_padding = tf.zeros([16000] - tf.shape(wav), dtype=tf.float32)
+
+    # Preprocess the audio directly from 'data'
+    # Ensure the waveform is 1 second (16000 samples) by padding/trimming
+    wav = tf.convert_to_tensor(data[:, 0], dtype=tf.float32)  # Convert to tensor if not already
+    zero_padding = tf.zeros([16000] - tf.shape(wav), dtype=tf.float32)  # Padding to 16000 samples
     wav = tf.concat([zero_padding, wav], 0)
+
+    # Create the spectrogram
     myspectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
-    myspectrogram = tf.abs(spectrogram)
-    myspectrogram = tf.expand_dims(spectrogram, axis=2)
-    
-    input_data = tf.expand_dims(spectrogram, axis=0)
+    myspectrogram = tf.abs(myspectrogram)  # Get the magnitude of the spectrogram
+    myspectrogram = tf.expand_dims(myspectrogram, axis=2)  # Add a channel dimension for model input
+
+    # Prepare the spectrogram for model input (add batch dimension)
+    input_data = tf.expand_dims(myspectrogram, axis=0)
+
+    # Make a prediction using the model
     my_prediction = model.predict(input_data)
-    
+
+    # Output prediction results
     for prediction in my_prediction:
         print(prediction)
         if prediction > 0.5:
             print("Molly detected")
         else:
             print("Nothing")
-    
-    try:
-        os.remove(file_path)
-    except Exception as e:
-        print(f"Error deleting file: {e}")
+
