@@ -245,16 +245,24 @@ while True:
         data = mic.record(numframes=48000)  # Record 1 second of audio
         sf.write(file=file_path, data=data[:, 0], samplerate=48000)  # Save as .wav file
         
-    wav = load_wav_16k_mono(file_path)
-    audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=16000, sequence_stride=15999, batch_size=1)
-    audio_slices = audio_slices.map(preprocess_mp3)
-    audio_slices = audio_slices.batch(64)
+    wav = load_wav_16k_mono(data[:, 0], sample_rate=48000)
+    zero_padding = tf.zeros([16000] - tf.shape(wav), dtype=tf.float32)
+    wav = tf.concat([zero_padding, wav], 0)
+    myspectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
+    myspectrogram = tf.abs(spectrogram)
+    myspectrogram = tf.expand_dims(spectrogram, axis=2)
     
-    yhat = model.predict(audio_slices)
+    input_data = tf.expand_dims(spectrogram, axis=0)
+    my_prediction = model.predict(input_data)
     
-    for prediction in yhat:
+    for prediction in my_prediction:
+        print(prediction)
         if prediction > 0.5:
             print("Molly detected")
         else:
             print("Nothing")
-        
+    
+    try:
+        os.remove(file_path)
+    except Exception as e:
+        print(f"Error deleting file: {e}")
