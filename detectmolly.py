@@ -99,7 +99,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=1, validation_data=test)
+hist = model.fit(train, epochs=4, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -236,15 +236,12 @@ os.makedirs(folder_path, exist_ok=True)
 
 i=0
 
-i = 0
-folder_path = "your_folder_path_here"  # You can leave this out if you're not saving files.
-
 while True:
-    i += 1
     
-    # Record 1 second of audio from the microphone
-    with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
-        data = mic.record(numframes=48000)  # Record 1 second of audio
+    i+=1
+
+    with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=16000) as mic:
+        data = mic.record(numframes=16000)  # Record 1 second of audio
 
     # Preprocess the audio directly from 'data'
     # Ensure the waveform is 1 second (16000 samples) by padding/trimming
@@ -270,4 +267,3 @@ while True:
             print("Molly detected")
         else:
             print("Nothing")
-
