@@ -137,109 +137,11 @@ def preprocess_mp3(sample, index):
     return spectrogram
 
 from itertools import groupby
-
-results = {}
-# for file in os.listdir(os.path.join('data', 'test_clips')):
-#     FILEPATH = os.path.join('data','test_clips', file)
-    
-#     wav = load_mp3_16k_mono(FILEPATH)
-#     audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=48000, sequence_stride=47999, batch_size=1)
-#     audio_slices = audio_slices.map(preprocess_mp3)
-#     audio_slices = audio_slices.batch(64)
-#     print(audio_slices)
-    
-#     yhat = model.predict(audio_slices)
-    
-#     results[file] = yhat
-
-# class_preds = {}
-# for file, logits in results.items():
-#     class_preds[file] = [1 if prediction > 0.99 else 0 for prediction in logits]
-
-
-# postprocessed = {}
-# for file, scores in class_preds.items():
-#     postprocessed[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
-
 import csv
 
-# with open('results.csv', 'w', newline='') as f:
-#     writer = csv.writer(f, delimiter=',')
-#     writer.writerow(['recording', 'molly_calls'])
-#     for key, value in postprocessed.items():
-#         writer.writerow([key, value])
-        
-
-# folder_path = "incomingaudio"
-# os.makedirs(folder_path, exist_ok=True)  # Create the folder if it doesn't exist
-
-# results2={}
-# # Record audio and save to separate files
-# for i in range(10):
-#     # Define the complete file path for each recording
-#     file_path = os.path.join(folder_path, f"TestRecording_{i + 1}.wav")
-
-#     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
-#         # Save a numpy array of audio in "data".
-#         data = mic.record(numframes=48000)
-#         sf.write(file=file_path, data=data[:, 0], samplerate=48000)
-
-# #pre-process our recorded "incomingaudio". Then, store the results of our model prediction in # "results2". (range from 0-1)
-# for file in os.listdir(folder_path):
-
-#     FILEPATH = os.path.join(folder_path, file)
-
-#     wav = load_mp3_16k_mono(FILEPATH)
-#     audio_slices = tf.keras.utils.timeseries_dataset_from_array(wav, wav, sequence_length=16000, sequence_stride=15999, batch_size=1)
-#     audio_slices = audio_slices.map(preprocess_mp3)
-#     audio_slices = audio_slices.batch(64)
-    
-#     yhat = model.predict(audio_slices)
-#     print(yhat)
-
-#     results2[file] = yhat
-
-#     class_preds2 = {}
-
-# # for item in results2.items():
-# #     print(item)
-# # print(results2)
-# for file, logits in results2.items():
-#     print(prediction for prediction in logits)
-
-# for file, logits in results2.items():
-#     class_preds2[file] = [1 if prediction > 0.5 else 0 for prediction in logits]
-# #class_preds2 has our classification reults (0 or 1) for our incoming audio.
-
-# #converts tensorflow array to NumPy array, and prints out results in the format (FILE : RESULT)
-# postprocessed2 = {}
-# for file, scores in class_preds2.items():
-#     postprocessed2[file] = tf.math.reduce_sum([key for key, group in groupby(scores)]).numpy()
-
-# for key, value in postprocessed2.items(): 
-#     print(key, value)
-
-
-# while(True):
-#     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=48000) as mic:
-#         # Save a numpy array of audio in "data".
-#         data = mic.record(numframes=48000)
-    
-#     yhat = model.predict()
-#     print(yhat)
-
-
-#//////////////////////////////////////
-#create folder path
-folder_path = "incomingaudio"
-os.makedirs(folder_path, exist_ok=True)
-
-i=0
 
 while True:
     
-    i+=1
-
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=16000) as mic:
         data = mic.record(numframes=16000)  # Record 1 second of audio
 
