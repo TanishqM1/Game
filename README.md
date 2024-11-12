@@ -4,5 +4,5 @@
 - Still a work in progress
 
 ## Credits
-- Thank you to [Nicholas Renotte](https://www.youtube.com/watch?v=ZLIPkmmDJAc) for the audio machine learning
+- Thank you to [Nicholas Renotte](https://www.youtube.com/watch?v=ZLIPkmmDJAc) for the audio machine learning tutorial
 
