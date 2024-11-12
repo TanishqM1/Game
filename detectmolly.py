@@ -99,7 +99,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=4, validation_data=test)
+hist = model.fit(train, epochs=1, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -138,7 +138,7 @@ def preprocess_mp3(sample, index):
 
 from itertools import groupby
 import csv
-
+from player import user
 
 while True:
     
@@ -161,11 +161,10 @@ while True:
 
     # Make a prediction using the model
     my_prediction = model.predict(input_data)
+    hpCheck = user.hpCheck()
 
     # Output prediction results
+
     for prediction in my_prediction:
-        print(prediction)
-        if prediction > 0.5:
+        if prediction > 0.5 and hpCheck:
             print("Molly detected")
-        else:
-            print("Nothing")
