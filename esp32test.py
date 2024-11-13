@@ -2,6 +2,16 @@ from machine import Pin
 from detectbullet import run_detectbullet
 import time
 
+class Pin:
+    OUT = 1
+
+    def __init__(self, pin_number, pin_type):
+        self.pin_number = pin_number
+        self.pin_type = pin_type
+
+    def value(self, val):
+        print(f"Pin {self.pin_number} set to {val}")
+    
 
 p = Pin(2, Pin.OUT)
 
