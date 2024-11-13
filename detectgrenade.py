@@ -5,6 +5,9 @@ import tensorflow_io as tfio
 import soundcard as sc
 import soundfile as sf
 
+
+# NEED TO FIND: spectrogram length, data length (to split training and testing)
+
 def load_wav_16k_mono(filename):
     # Load encoded wav file
     file_contents = tf.io.read_file(filename)
@@ -33,8 +36,8 @@ data = positives.concatenate(negatives)
 
 #finding lengths of all data files
 lengths = []
-for file in os.listdir(os.path.join('data', 'Updated_Molotov_Clips_1sec')):
-    tensor_wave = load_wav_16k_mono(os.path.join('data', 'Updated_Molotov_Clips_1sec', file))
+for file in os.listdir(os.path.join('data', 'Grenade_Clips')):
+    tensor_wave = load_wav_16k_mono(os.path.join('data', 'Grenade_Clips', file))
     lengths.append(len(tensor_wave))
 
 tf.math.reduce_mean(lengths)
@@ -167,4 +170,4 @@ while True:
 
     for prediction in my_prediction:
         if prediction > 0.5 and hpCheck:
-            print("Molly detected")
+            print("Grenade detected")
