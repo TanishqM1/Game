@@ -20,7 +20,7 @@ def load_wav_16k_mono(filename):
 
 # Pathways to positive and negative clips
 POS = os.path.join('data', 'zeus_clips')
-NEG = os.path.join('data', 'zeus_not_clips')
+NEG = os.path.join('data', 'Updated_Non_Molotov_Clips_1sec')
 
 # Filtering .wav files in each folder
 pos2 = tf.data.Dataset.list_files(POS + '\*.wav')

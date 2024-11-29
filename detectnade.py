@@ -22,7 +22,7 @@ def load_wav_16k_mono(filename):
 
 #pathways to positive and negative clips
 POS = os.path.join('data', 'Grenade_Clips')
-NEG = os.path.join('data', 'Not_Grenade_Clips')
+NEG = os.path.join('data', 'Updated_Non_Molotov_Clips_1sec')
 
 
 #filtering .wav files in each folder
