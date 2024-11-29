@@ -2,7 +2,7 @@ from pydub import AudioSegment
 import os
 
 # Load the .wav file
-input_file = "molly.wav"
+input_file = "grenade_sounds.wav"
 audio = AudioSegment.from_wav(input_file)
 
 # Length of each split in milliseconds (3 seconds = 3000 milliseconds)
@@ -13,7 +13,7 @@ total_duration_ms = len(audio)
 splits_count = (total_duration_ms + split_length_ms - 1) // split_length_ms  # Round up
 
 # Create output directory if it doesn't exist
-output_dir = "Updated_Molotov_Clips_1sec"
+output_dir = "Grenade_Clips"
 os.makedirs(output_dir, exist_ok=True)
 
 # Split and export each segment
