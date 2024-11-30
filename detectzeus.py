@@ -72,8 +72,8 @@ data = data.prefetch(8)
 print(len(data))
 
 # Splitting data into training (70%) and testing (30%)
-train = data.take(64)
-test = data.skip(64).take(28)
+train = data.take(33)
+test = data.skip(33).take(14)
 
 # Showing spectrogram shape needed for a positive match
 samples, labels = train.as_numpy_iterator().next()
