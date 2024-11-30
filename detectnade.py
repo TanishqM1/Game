@@ -164,10 +164,9 @@ while True:
 
     # Make a prediction using the model
     my_prediction = model.predict(input_data)
-    hpCheck = user.hpCheck()
 
     # Output prediction results
 
     for prediction in my_prediction:
-        if prediction > 0.5 and hpCheck:
+        if prediction > 0.5:
             print("Grenade detected")
