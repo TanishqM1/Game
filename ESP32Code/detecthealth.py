@@ -3,7 +3,10 @@ import numpy as np
 import pytesseract
 from mss import mss
 
-import serial
+import requests
+
+esp_ip = '192.168.1.78'  # Replace with your ESP32's IP
+port = 8080
 
 # Define the screen region to capture (x, y, width, height)
 monitor = {"top": 1007, "left": 616, "width": 71, "height": 54}
@@ -11,8 +14,6 @@ deathCam = {"top": 1014, "left": 1112, "width": 68, "height": 18}
 weapons = {"CZ75-Auto", "Desert Eagle", "Dual Berettas", "Five-SeveN", "Glock-18", "P2000", "P250", "R8 Revolver", "Tec-9", "USP-S", "AK-47",  
            "AUG", "AWP", "FAMAS", "G3SG1", "Galil AR", "M4A1-S", "M4A4", "SCAR-20", "SG 553", "SSG 08", "MAC-10", "MP5-SD", "MP7", "MP9", "PP-Bizon", 
             "P90", "P9o", "UMP-45", "MAG-7", "Nova", "Sawed-Off", "XM1014", "M249", "Negev"}
-
-ser = serial.Serial('COM3', 115200, timeout=1)
 
 def detect():
     with mss() as sct:
@@ -32,14 +33,25 @@ def detect():
             hp = int(hp_text.strip())
             if death_text.strip() in weapons:
                 #return -2 #dead
-                ser.write(-2)
+                change_led("dead")
                 return
             if hp == 100 and death_text =="":
                 #return -1 #alive
-                ser.write(-1)
+                change_led("alive")
                 return
             #return hp
-            ser.write(hp)
+            change_led(hp_text)
         except Exception:
-            ser.write(101)
+            change_led('101')
             #return 101      
+
+def change_led(state):
+    url = f'http://{esp_ip}:{port}/led/{state}'
+    try:
+        response = requests.get(url)
+        print(response.text)
+    except Exception as e:
+        print(f"Error: {e}")
+
+while True:
+    detect()
