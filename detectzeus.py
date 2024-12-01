@@ -144,5 +144,6 @@ while True:
     my_prediction = model.predict(input_data)
 
     for prediction in my_prediction:
+        print(prediction)
         if prediction > 0.5:
             print("Zeus detected")
