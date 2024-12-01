@@ -20,7 +20,7 @@ def load_wav_16k_mono(filename):
     return wav
 
 #pathways to positive and negative clips
-POS = os.path.join('data', 'Grenade_Clips')
+POS = os.path.join('data', 'New')
 NEG = os.path.join('data', 'Updated_Non_Molotov_Clips_1sec')
 
 
@@ -35,8 +35,8 @@ data = positives.concatenate(negatives)
 
 #finding lengths of all data files
 lengths = []
-for file in os.listdir(os.path.join('data', 'Grenade_Clips')):
-    tensor_wave = load_wav_16k_mono(os.path.join('data', 'Grenade_Clips', file))
+for file in os.listdir(os.path.join('data', 'New')):
+    tensor_wave = load_wav_16k_mono(os.path.join('data', 'New', file))
     lengths.append(len(tensor_wave))
 
 tf.math.reduce_mean(lengths)
@@ -75,8 +75,8 @@ data = data.prefetch(8)
 print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
-train = data.take(35)
-test = data.skip(35).take(15)
+train = data.take(70)
+test = data.skip(70).take(30)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()

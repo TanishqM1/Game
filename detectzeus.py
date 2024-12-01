@@ -1,5 +1,4 @@
 import os
-from matplotlib import pyplot as plt
 import tensorflow as tf
 import tensorflow_io as tfio
 import soundcard as sc
@@ -92,7 +91,7 @@ model.add(Dense(1, activation='sigmoid'))
 model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recall(), tf.keras.metrics.Precision()])
 
 # Training model (epochs can be adjusted for accuracy)
-hist = model.fit(train, epochs=1, validation_data=test)
+hist = model.fit(train, epochs=4, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -146,5 +145,5 @@ while True:
     hpCheck = user.hpCheck()
 
     for prediction in my_prediction:
-        if prediction > 0.5 and hpCheck:
+        if prediction > 0.5:
             print("Zeus detected")
