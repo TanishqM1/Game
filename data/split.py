@@ -2,7 +2,7 @@ from pydub import AudioSegment
 import os
 
 # Load the .wav file
-input_file = "grenade_sounds.wav"
+input_file = "data\grenade_sounds_2.wav"
 audio = AudioSegment.from_wav(input_file)
 
 # Length of each split in milliseconds (3 seconds = 3000 milliseconds)
@@ -23,7 +23,7 @@ for i in range(splits_count):
     split_audio = audio[start_time:end_time]
     
     # Export each split as a new .wav file
-    output_filename = f"{output_dir}/split_{i+1}.wav"
+    output_filename = f"{output_dir}/split_{i+1+61}.wav"
     split_audio.export(output_filename, format="wav")
     print(f"Exported: {output_filename}")
 
