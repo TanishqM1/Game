@@ -1,5 +1,4 @@
 import os
-from matplotlib import pyplot as plt
 import tensorflow as tf 
 import tensorflow_io as tfio
 import soundcard as sc
@@ -26,8 +25,8 @@ NEG = os.path.join('data', 'Updated_Non_Molotov_Clips_1sec')
 
 
 #filtering .wav files in each folder
-pos2 = tf.data.Dataset.list_files(POS+'\*.wav')
-neg2 = tf.data.Dataset.list_files(NEG+'\*.wav')
+pos2 = tf.data.Dataset.list_files(POS+'/*.wav')
+neg2 = tf.data.Dataset.list_files(NEG+'/*.wav')
 
 #idk
 positives = tf.data.Dataset.zip((pos2, tf.data.Dataset.from_tensor_slices(tf.ones(len(pos2)))))
@@ -76,8 +75,8 @@ data = data.prefetch(8)
 print(len(data))
 #train machine using 70% of clips and test on the renaming 30%.
 
-train = data.take(42)
-test = data.skip(42).take(18)
+train = data.take(35)
+test = data.skip(35).take(15)
 
 #show spectogram shape needed, for a positive match.
 samples, labels = train.as_numpy_iterator().next()
@@ -102,7 +101,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=1, validation_data=test)
+hist = model.fit(train, epochs=4, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -168,5 +167,6 @@ while True:
     # Output prediction results
 
     for prediction in my_prediction:
+        print(prediction)
         if prediction > 0.5:
             print("Grenade detected")
