@@ -71,8 +71,8 @@ data = data.prefetch(8)
 print(len(data))
 
 # Splitting data into training (70%) and testing (30%)
-train = data.take(33)
-test = data.skip(33).take(14)
+train = data.take(60)
+test = data.skip(60).take(27)
 
 # Showing spectrogram shape needed for a positive match
 samples, labels = train.as_numpy_iterator().next()
@@ -142,7 +142,6 @@ while True:
     input_data = tf.expand_dims(myspectrogram, axis=0)
 
     my_prediction = model.predict(input_data)
-    hpCheck = user.hpCheck()
 
     for prediction in my_prediction:
         if prediction > 0.5:
