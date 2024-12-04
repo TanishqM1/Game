@@ -99,7 +99,7 @@ model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recal
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=1, validation_data=test)
+hist = model.fit(train, epochs=6, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -140,6 +140,21 @@ from itertools import groupby
 import csv
 from player import user
 
+#<---esp32 stuff start--->
+import requests
+esp_ip = '192.168.1.78'  #ESP32's IP
+port = 8080
+
+def change_led(state):
+    url = f'http://{esp_ip}:{port}/led/{state}'
+    try:
+        response = requests.get(url)
+        print(response.text)
+    except Exception as e:
+        print(f"Error: {e}")
+
+#<---esp32 stuff end--->
+
 while True:
     
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=16000) as mic:
@@ -168,3 +183,6 @@ while True:
     for prediction in my_prediction:
         if prediction > 0.5 and hpCheck:
             print("Molly detected")
+            change_led('pos')
+        else:
+            change_led('neg')
