@@ -14,7 +14,7 @@ The primary objective of this project is to use machine learning models to evalu
 
 ## Features:
 - **Audio Detection**: 
-  - Detects key audio signals such as Molotovs, grenades, and Zeus strikes using trained machine learning models.
+  - Detects  audio signals from Molotovs using trained machine learning models.
   - Processes audio using a custom pipeline to convert raw audio data into spectrograms for model input.
 
 - **Visual Detection**:
