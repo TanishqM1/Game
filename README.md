@@ -3,7 +3,7 @@
 This project utilizes Python libraries like OpenCV to collect and process visual data, and Python with TensorFlow to collect audio data, train machine learning models, and evaluate audio data.
 
 ## Goal:
-The primary objective of this project is to use machine learning models to evaluate both audio and visual data, identifying significant game events such as Molotovs, grenades, Zeus strikes, and health changes. These events are then communicated to an ESP32 controller, to send signals based on detected events.
+The primary objective of this project is to use machine learning models to evaluate both audio and visual data, identifying significant game events such as bullets, flash grenades, molotovs, grenades, zeus strikes, and health changes. These events are then communicated to an ESP32 controller, to send signals based on detected events.
 
 ## Technologies Used:
 - **TensorFlow w/ Keras**: Used for building and training machine learning models to classify audio cues.
