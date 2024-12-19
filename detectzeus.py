@@ -51,7 +51,7 @@ def preprocess(file_path, label):
     wav = wav[:16000]
     zero_padding = tf.zeros([16000] - tf.shape(wav), dtype=tf.float32)
     wav = tf.concat([zero_padding, wav], 0)
-    spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
+    spectrogram = tf.signal.stft(wav, frame_length=512, frame_step=128)
     spectrogram = tf.abs(spectrogram)
     spectrogram = tf.expand_dims(spectrogram, axis=2)
     return spectrogram, label
@@ -79,16 +79,30 @@ samples, labels = train.as_numpy_iterator().next()
 
 from tensorflow.keras.models import Sequential
 from tensorflow.keras.layers import Conv2D, Dense, Flatten
+from tensorflow.keras.layers import Dropout
+from tensorflow.keras.layers import MaxPooling2D
 
 # Building deep learning model
 model = Sequential()
-model.add(Conv2D(16, (3, 3), activation='relu', input_shape=(491, 257, 1)))
-model.add(Conv2D(16, (3, 3), activation='relu'))
+model.add(Conv2D(64, (3,3), activation='relu', input_shape=(122, 257, 1)))
+model.add(Conv2D(64, (3,3), activation='relu'))
+model.add(Dropout(0.3))
+model.add(Conv2D(64, (3,3), activation='relu'))
+model.add(MaxPooling2D(2, 2))
+model.add(Dropout(0.3))
+model.add(Conv2D(64, (3,3), activation='relu'))
+model.add(MaxPooling2D(2, 2))
 model.add(Flatten())
 model.add(Dense(128, activation='relu'))
+model.add(Dropout(0.4))
 model.add(Dense(1, activation='sigmoid'))
 
-model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recall(), tf.keras.metrics.Precision()])
+from tensorflow.keras.optimizers import Adam
+from tensorflow.keras.metrics import Precision
+
+model.compile(optimizer=Adam(learning_rate=0.0001), 
+              loss='binary_crossentropy', 
+              metrics=['accuracy', Precision()])
 
 # Training model (epochs can be adjusted for accuracy)
 hist = model.fit(train, epochs=4, validation_data=test)
@@ -103,30 +117,8 @@ print(tf.math.reduce_sum(y_test))
 print(yhat)
 print(y_test)
 
-# Function to load MP3 as 16k mono
-def load_mp3_16k_mono(filename):
-    """ Load a WAV file, convert it to a float tensor, resample to 16 kHz single-channel audio. """
-    res = tfio.audio.AudioIOTensor(filename)
-    tensor = res.to_tensor()
-    tensor = tf.math.reduce_sum(tensor, axis=1) / 2
-    sample_rate = res.rate
-    sample_rate = tf.cast(sample_rate, dtype=tf.int64)
-    wav = tfio.audio.resample(tensor, rate_in=sample_rate, rate_out=16000)
-    return wav
-
-# Preprocess MP3 sample for spectrogram
-def preprocess_mp3(sample, index):
-    sample = sample[0]
-    zero_padding = tf.zeros([16000] - tf.shape(sample), dtype=tf.float32)
-    wav = tf.concat([zero_padding, sample], 0)
-    spectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
-    spectrogram = tf.abs(spectrogram)
-    spectrogram = tf.expand_dims(spectrogram, axis=2)
-    return spectrogram
-
 from itertools import groupby
 import csv
-from player import user
 
 while True:
     with sc.get_microphone(id=str(sc.default_speaker().name), include_loopback=True).recorder(samplerate=16000) as mic:
@@ -136,7 +128,7 @@ while True:
     zero_padding = tf.zeros([16000] - tf.shape(wav), dtype=tf.float32)
     wav = tf.concat([zero_padding, wav], 0)
 
-    myspectrogram = tf.signal.stft(wav, frame_length=320, frame_step=32)
+    myspectrogram = tf.signal.stft(wav, frame_length=512, frame_step=128)
     myspectrogram = tf.abs(myspectrogram)
     myspectrogram = tf.expand_dims(myspectrogram, axis=2)
     input_data = tf.expand_dims(myspectrogram, axis=0)
