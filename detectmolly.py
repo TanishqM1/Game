@@ -112,8 +112,6 @@ model.add(Dense(128, activation='relu'))
 model.add(Dropout(0.4))
 model.add(Dense(1, activation='sigmoid'))
 
-
-
 # model.compile('Adam', loss='BinaryCrossentropy', metrics=[tf.keras.metrics.Recall(),tf.keras.metrics.Precision(),tf.keras.metrics.Accuracy()])
 
 from tensorflow.keras.optimizers import Adam
@@ -127,7 +125,7 @@ model.compile(optimizer=Adam(learning_rate=0.0001),
 #train model
 
 # epochs can be tweaked. Larger = more accurate
-hist = model.fit(train, epochs=6, validation_data=test)
+hist = model.fit(train, epochs=1, validation_data=test)
 
 X_test, y_test = test.as_numpy_iterator().next()
 yhat = model.predict(X_test)
@@ -146,7 +144,7 @@ from player import user
 
 #<---esp32 stuff start--->
 import requests
-esp_ip = '192.168.1.78'  #ESP32's IP
+esp_ip = '192.168.1.82'  #ESP32's IP
 port = 8080
 
 def change_led(state):
@@ -193,4 +191,5 @@ while True:
             print("Molly detected")
             change_led('pos')
         else:
+            print("No Molly detected")
             change_led('neg')
